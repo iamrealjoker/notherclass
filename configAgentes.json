@@ -1,0 +1,148 @@
+{
+  "_comentario": "Config CENTRAL de agentes (escalable a miles). _defaults = compartido; agentes.<id> = solo lo que difiere. Claves secretas se referencian con $keys.<nombre> (seccion api_keys). Para anadir un agente: copia una entrada en 'agentes'. Se exporta via agent/core/agentconfig.py.",
+  "_default": "joker",
+  "api_keys": {
+    "zai_primary": "$env.ZAI_PRIMARY",
+    "deepseek_primary": "$env.DEEPSEEK_PRIMARY",
+    "deepseek_pro": "$env.DEEPSEEK_PRO"
+  },
+  "_defaults": {
+    "llm_provider": "deepseek",
+    "llm_api_key": "$env.TW_LLM_API_KEY",
+    "llm_base_url": "$env.TW_LLM_BASE_URL",
+    "llm_model": "$env.TW_LLM_MODEL",
+    "reasoning_effort": "high",
+    "thinking": 1,
+    "native_tools": 1,
+    "persona": "AGENTS/notherclass-joker.md",
+    "workspace": "../",
+    "memory_dir": "MEMORY",
+    "context_budget_tokens": 20000,
+    "working_chunks": 6,
+    "recall_max_items": 8,
+    "recall_min_ratio": 0.25,
+    "telegram_allowed_user_ids": "",
+    "max_reply_chars": 3200,
+    "show_usage_footer": 1,
+    "agent_max_tokens": 65536,
+    "confirm_edits": 0,
+    "enable_review": 1,
+    "review_model": "$env.TW_REVIEW_MODEL",
+    "review_api_key": "$env.TW_REVIEW_API_KEY",
+    "review_base_url": "$env.TW_REVIEW_BASE_URL",
+    "review_reasoning_effort": "high",
+    "review_thinking": 1,
+    "review_max_rounds": 1,
+    "review_max_tokens": 20000,
+    "review_max_fetches": 3,
+    "log_file": "logs/agent.log",
+    "max_iters": 12,
+    "tool_out_cap": 1800,
+    "hist_keep": 4,
+    "hist_cap": 500,
+    "hist_maxchars": 160000,
+    "plan_first": 1,
+    "plan_min_chars": 20,
+    "plan_max_tokens": 320,
+    "show_plan": 0,
+    "consolidate_every": 0,
+    "consolidate_min_chunks": 2
+  },
+  "agentes": {
+    "joker": {
+      "_desc": "Asistente principal de NotherClass (Telegram + Superconsola web). store=Forja conserva su memoria.",
+      "name": "Joker",
+      "store": "Forja",
+      "http_port": 5052,
+      "telegram_bot_token": "$env.TW_TELEGRAM_BOT_TOKEN"
+    },
+    "horas_extras": {
+      "_desc": "EJEMPLO (desactivado): pon '_supervisar': true cuando quieras un segundo agente (por ejemplo para probar el grupo con el coordinador). Necesita SU PROPIO token de Telegram. Ver GRUPO_Y_REVISION.md.",
+      "name": "Horas Extras",
+      "store": "horas_extras",
+      "http_port": 5055,
+      "persona": "{carpeta}/persona.md",
+      "telegram_bot_token": "$env.TW_TELEGRAM_BOT_TOKEN",
+      "_tipo": "ag",
+      "carpeta": "Ag.HorasExtras",
+      "memory_dir": "{carpeta}/memory",
+      "log_file": "{carpeta}/logs/agent.log",
+      "_supervisar": false
+    },
+    "jokerv1": {
+      "_tipo": "ag",
+      "_desc": "EJEMPLO (desactivado): pon '_supervisar': true cuando quieras un segundo agente (por ejemplo para probar el grupo con el coordinador). Necesita SU PROPIO token de Telegram. Ver GRUPO_Y_REVISION.md.",
+      "name": "JokerV1",
+      "store": "jokerv1",
+      "http_port": 5053,
+      "carpeta": "Ag.JokerV1",
+      "persona": "{carpeta}/persona.md",
+      "memory_dir": "{carpeta}/memory",
+      "log_file": "{carpeta}/logs/agent.log",
+      "reasoning_effort": "high",
+      "thinking": 1,
+      "native_tools": 1,
+      "review_reasoning_effort": "high",
+      "review_thinking": 1,
+      "telegram_bot_token": "$env.TW_TELEGRAM_BOT_TOKEN",
+      "_supervisar": false
+    },
+    "jokerv2": {
+      "_tipo": "ag",
+      "_desc": "EJEMPLO (desactivado): pon '_supervisar': true cuando quieras un segundo agente (por ejemplo para probar el grupo con el coordinador). Necesita SU PROPIO token de Telegram. Ver GRUPO_Y_REVISION.md.",
+      "name": "JokerV2",
+      "store": "jokerv2",
+      "http_port": 5054,
+      "carpeta": "Ag.JokerV2",
+      "persona": "{carpeta}/persona.md",
+      "memory_dir": "{carpeta}/memory",
+      "log_file": "{carpeta}/logs/agent.log",
+      "telegram_bot_token": "$env.TW_TELEGRAM_BOT_TOKEN",
+      "reasoning_effort": "high",
+      "thinking": 1,
+      "native_tools": 1,
+      "review_reasoning_effort": "high",
+      "review_thinking": 1,
+      "_supervisar": false
+    }
+  },
+  "servicios_extra": {
+    "_comentario": "Procesos que NO son agentes 'run.py' pero el supervisor mantiene vivos (auto-arranque con Docker). cmd/cwd relativos a la raiz del repo.",
+    "traductor": {
+      "_desc": "Bot traductor en tiempo real (Lengua) @translator404bot",
+      "name": "Lengua (traductor)",
+      "cmd": "python3 -u traductor_bot.py",
+      "cwd": "translator",
+      "log": "translator/daemon.out"
+    },
+    "consola": {
+      "_desc": "Consola/superconsola web de NotherClass (Flask, puerto INTERNO 5051). La publica en el 5000 el multiplexor proxy5000.py (HTTP+HTTPS en el mismo puerto).",
+      "name": "Consola NotherClass (interna 5051)",
+      "cmd": "python3 -u consola_interna.py",
+      "cwd": "consola",
+      "log": "consola/server_live.log"
+    },
+    "proxy5000": {
+      "_desc": "MULTIPLEXOR del puerto 5000: un SOLO puerto que habla HTTP y HTTPS. Mira el primer byte (0x16 = TLS): si es TLS lo descifra, si no lo pasa tal cual; siempre hacia la consola interna del 5051. Asi el micro del navegador funciona por https://<ip>:5000 SIN romper los curl http:// ni abrir puertos nuevos en Docker.",
+      "name": "Consola 5000 (HTTP+HTTPS)",
+      "cmd": "python3 -u proxy5000.py",
+      "cwd": "consola",
+      "log": "consola/proxy_live.log"
+    },
+    "coordinador": {
+      "_desc": "Coordinador de GRUPO (opcional, desactivado). Solo tiene sentido si creas un grupo de Telegram con DOS agentes dentro. Para usarlo: pon '_supervisar': true y arrancalo con 'python3 coordinador.py'. Ver GRUPO_Y_REVISION.md.",
+      "name": "Coordinador (pizarra)",
+      "cmd": "python3 -u coordinador.py",
+      "cwd": "agent",
+      "log": "agent/logs/coordinador.out",
+      "_supervisar": false
+    },
+    "stt_residente": {
+      "_desc": "STT RESIDENTE (faster-whisper): carga el modelo UNA vez y atiende en el puerto 5077. SIN supervisor, si se cae, la web y Telegram vuelven al modo lento EN SILENCIO (el cliente cae al CLI). Por eso se supervisa aqui.",
+      "name": "STT residente (fw_stt --servir)",
+      "cmd": "venv311/bin/python -u fw_stt.py --servir 5077",
+      "cwd": "agent",
+      "log": "agent/logs/stt_residente.out"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# docker-compose.yml — BASE común (la usan dev y prod)
+#
+# ⚠️ NO se parte en varios contenedores a propósito: el agente principal es el PID 1
+#    y el supervisor (watcher/guardián) arranca y vigila al resto leyendo /proc
+#    DENTRO del contenedor. Si los separas, se cae el auto-arranque.
+#
+# SIEMPRE se usa junto a un overlay y con un NOMBRE DE PROYECTO distinto:
+#   DEV  : docker compose -p nc-dev  -f docker-compose.yml -f docker-compose.dev.yml  up -d
+#   PROD : docker compose -p nc-prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Cada proyecto levanta SU propio agente + watcher + extras (los puertos internos
+# no chocan: cada contenedor tiene su propia red).
+services:
+  notherclass:
+    image: ${TW_IMAGE:-notherclass:latest}
+    container_name: ${TW_NAME:-notherclass}
+    restart: unless-stopped
+    # El ENTRYPOINT de la imagen es ["/bin/bash"], así que `command` son los
+    # ARGUMENTOS de bash (no repetir "/bin/bash").
+    command:
+      - "-c"
+      - >-
+        exec python3 /app/notherclass/agent/run.py
+    working_dir: /app/notherclass/agent
+    env_file:
+      - ${TW_ENV_FILE:-./dev/notherclass/agent/.env}
+    environment:
+      - TZ=${TZ:-Europe/Madrid}
+    volumes:
+      - ${TW_CODE:-./dev/notherclass}:/app/notherclass
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:5000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+

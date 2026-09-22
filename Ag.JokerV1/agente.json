@@ -1,0 +1,15 @@
+{
+  "_tipo": "ag",
+  "id": "jokerv1",
+  "nombre": "JokerV1",
+  "store": "jokerv1",
+  "folder": "Ag.JokerV1",
+  "rol": "Agente de EJEMPLO (clon de Joker)",
+  "desc": "Agente de EJEMPLO creado desde la plantilla: sirve para ver como se define un agente.",
+  "creado": "2026-09-12T05:51:23Z",
+  "estado": "creado",
+  "persona": "{carpeta}/persona.md",
+  "memoria": "{carpeta}/memory",
+  "logs": "{carpeta}/logs",
+  "telegram_bot_token": "TOKEN_DE_TELEGRAM_AQUI"
+}

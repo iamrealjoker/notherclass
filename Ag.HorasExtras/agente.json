@@ -1,0 +1,13 @@
+{
+  "_tipo": "ag",
+  "id": "horas_extras",
+  "nombre": "Horas Extras",
+  "store": "horas_extras",
+  "folder": "Ag.HorasExtras",
+  "desc": "Agente creado por el agente creador (rol: Asistente personal de control de horas extras por VOZ. El humano le manda notas de audio (en espanol) y el agente: registra cada jornada (fecha), cuantas horas extra trabajo y a cuanto le pagan la hora; lleva el acumulado; y al pedirlo muestra una tabla clara y bonita con: fecha | horas | pago/hora | total del dia | acumulado del periodo. Tambien contesta preguntas y dudas en espanol.)",
+  "estado": "migrado",
+  "persona": "{carpeta}/persona.md",
+  "memoria": "{carpeta}/memory",
+  "logs": "{carpeta}/logs",
+  "telegram_bot_token": "TOKEN_DE_TELEGRAM_AQUI"
+}

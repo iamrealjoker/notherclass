@@ -1,0 +1,4 @@
+# NotherClass — Superconsola web (Flask)
+# Instalar:  pip install -r consola/requirements.txt
+Flask>=3.0
+requests>=2.28

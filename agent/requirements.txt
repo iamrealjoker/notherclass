@@ -1,0 +1,8 @@
+# NotherClass Agent — dependencias
+# Casi todo es stdlib. Estas son las imprescindibles:
+requests>=2.28
+
+# ── Opcional (muy recomendado) ──────────────────────────────────────────────
+# Embeddings semánticos REALES en la memoria (si falta, usa fallback por hash):
+# sentence-transformers>=2.2
+# numpy>=1.24                 # coseno vectorial rápido (si falta, usa Python puro)

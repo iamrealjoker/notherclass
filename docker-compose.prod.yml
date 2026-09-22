@@ -1,0 +1,18 @@
+# docker-compose.prod.yml — ENTORNO DE PRODUCCIÓN
+#   docker compose -p nc-prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# · Código ESTABLE, copia separada del de dev (./prod/notherclass).
+# · Solo escucha en 127.0.0.1: tu proxy inverso (nginx/Caddy con HTTPS + auth) es
+#   la ÚNICA entrada pública. Nunca expongas la consola directamente.
+# · ⚠️ Usa un TOKEN DE TELEGRAM DISTINTO al de dev (dos pollers = conflicto).
+services:
+  notherclass:
+    container_name: nc-prod
+    environment:
+      - TZ=${TZ:-Europe/Madrid}
+      - TW_PERFIL=prod
+    ports:
+      - "127.0.0.1:${TW_PORT_PROD:-5001}:5000"   # muy recomendado: solo localhost
+    volumes:
+      - ./prod/notherclass:/app/notherclass
+

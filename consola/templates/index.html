@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NotherClass · Superconsola</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;display:flex;height:100vh;height:100dvh;overflow:hidden}
+#sidebar{width:250px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;transition:margin-left .15s;overflow-y:auto}
+#sidebar.oculto{margin-left:-250px}
+#sidebar h1{font-size:15px;padding:14px;color:#58a6ff;border-bottom:1px solid #30363d;position:sticky;top:0;background:#161b22;z-index:2}
+.mitem{padding:10px 14px;cursor:pointer;border-left:3px solid transparent;font-size:14px}
+.mitem:hover{background:#21262d}
+.mitem.sel{background:#21262d;border-left-color:#58a6ff}
+.mitem .sub{margin-left:14px;display:none}
+.mitem.abierto .sub{display:block}
+.mitem .chev{float:right;font-size:11px;opacity:.6}
+.msub{padding:7px 12px;font-size:13px;color:#8b949e;border-left:3px solid transparent;cursor:pointer}
+.msub:hover{background:#21262d;color:#e6edf3}
+.msub.sel{color:#58a6ff;border-left-color:#58a6ff}
+#switchbox{margin-top:auto;padding:12px;border-top:1px solid #30363d}
+.switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px}
+.switch .track{width:34px;height:18px;background:#30363d;border-radius:10px;position:relative;transition:background .15s;flex-shrink:0}
+.switch .track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#e6edf3;transition:left .15s}
+.switch.on .track{background:#238636}
+.switch.on .track::after{left:18px}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh}
+#head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #30363d;background:#161b22}
+#burger{background:none;border:1px solid #30363d;color:#e6edf3;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:15px}
+#burger:hover{background:#21262d}
+#titulo{font-weight:600;font-size:15px}
+#modo_lbl{font-size:12px;opacity:.6;margin-left:auto}
+.vista{flex:1;overflow-y:auto;padding:16px;display:none}
+.vista.activa{display:flex;flex-direction:column}
+.m{max-width:78%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.m.humano{align-self:flex-end;background:#1f6feb;color:#fff;border-bottom-right-radius:4px}
+.m.ia{align-self:flex-start;background:#21262d;border:1px solid #30363d;border-bottom-left-radius:4px}
+
+/* ---------- RESPONSIVE MÓVIL ---------- */
+@media(max-width:800px){
+  /* sidebar off-canvas: se desliza desde la izquierda, no empuja el contenido */
+  #sidebar{position:fixed;z-index:50;top:0;left:0;height:100%;margin-left:0;box-shadow:0 0 30px rgba(0,0,0,.6);transition:transform .2s;transform:translateX(-100%)}
+  #sidebar.oculto{transform:translateX(-100%)}
+  #sidebar:not(.oculto){transform:translateX(0)}
+  /* capa oscurecedora al abrir el menú en móvil */
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
+  #overlay.vis{display:block}
+  #burger{display:inline-block!important}
+  /* barra de cabecera compacta */
+  #head{padding:8px 10px;gap:8px}
+  #titulo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  #modo_lbl{font-size:11px;white-space:nowrap}
+  /* chat: burbujas más anchas y campo de entrada tipo app móvil (fijo abajo) */
+  .vista{padding:10px}
+  .m{max-width:88%;font-size:13.5px;padding:8px 12px}
+  #v_chat{padding:10px 10px 0}
+  #msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  /* 100dvh (arriba) + safe-area: SIN esto la barra de escribir quedaba DETRÁS de la
+     barra del navegador móvil y no se veía (el fallo que reportó el jefe). */
+  #v_chat{min-height:0}
+  #inputbar{position:sticky;bottom:0;background:#0d1117;
+            padding:8px 0 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));
+            border-top:1px solid #30363d}
+  #inputbar textarea{font-size:16px !important; /* evita zoom automático iOS */ padding:9px 12px}
+  #inputbar button{padding:9px 14px;font-size:14px}
+  /* tablas del modo humano legibles sin desbordar */
+  #v_datos pre{font-size:12px}
+  table,pre{max-width:100%;overflow-x:auto;display:block}
+  /* textarea traductor ocupa todo el ancho */
+  #v_traducir>div{max-width:100% !important}
+  .switch{font-size:12px}
+}
+/* ---------- MODO VOZ ---------- */
+#mic.escuchando{background:#da3633;border-color:#da3633;color:#fff;animation:pulso 1.2s infinite}
+#mic.continuo{background:#1f6feb;border-color:#1f6feb;color:#fff}
+#mic_cont.continuo{background:#1f6feb;border-color:#1f6feb;color:#fff}
+@keyframes pulso{0%,100%{box-shadow:0 0 0 0 rgba(218,54,51,.5)}50%{box-shadow:0 0 0 8px rgba(218,54,51,0)}}
+/* móvil muy estrecho */
+@media(max-width:380px){
+  .m{max-width:94%;font-size:13px}
+  #titulo{font-size:13px}
+}
+</style>
+</head>
+<body>
+<nav id="sidebar">
+<h1>🤖 NotherClass ✦</h1>
+<div id="menu"></div>
+<div id="switchbox">
+<label class="switch" id="sw_modo"><span class="track"></span><span id="modo_txt">Modo IA</span></label>
+</div>
+</nav>
+<div id="overlay"></div>
+<main id="main">
+<div id="head"><button id="burger">☰</button><span id="titulo">…</span><span id="modo_lbl">modo agente (idioma IA)</span></div>
+<div id="v_chat" class="vista activa">
+<div id="msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px"></div>
+<div id="inputbar" style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #30363d">
+<textarea id="txt" rows="1" style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;border-radius:10px;padding:10px 14px;font-size:14px;resize:none;outline:none" placeholder="Escribe un mensaje…"></textarea>
+<button id="mic" title="Sujetar para hablar (push-to-talk)" style="touch-action:none;-webkit-user-select:none;user-select:none;background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:17px;flex-shrink:0">🎙</button>
+<button id="mic_cont" title="MODO CONVERSACIÓN: pulsa UNA vez y habla; el bot responde en voz y te sigue escuchando sin pulsar más. Pulsa 🔴 de nuevo para apagar" style="background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:15px;flex-shrink:0">🎧</button>
+<button id="send" style="background:#238636;color:#fff;border:none;border-radius:10px;padding:10px 18px;cursor:pointer">Enviar</button>
+</div>
+</div>
+<div id="v_datos" class="vista"><pre id="datos" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word"></pre></div>
+<div id="v_traducir" class="vista">
+<div style="display:flex;gap:8px;flex-direction:column;max-width:640px">
+<textarea id="tr_in" rows="4" style="background:#0d1117;border:1px solid #30363d;color:#e6edf3;border-radius:10px;padding:10px;font-size:14px;resize:vertical" placeholder="Texto a traducir…"></textarea>
+<div style="display:flex;gap:8px">
+<button id="tr_h" style="background:#1f6feb;color:#fff;border:none;border-radius:10px;padding:8px 14px;cursor:pointer">🌐 A humano</button>
+<button id="tr_ia" style="background:#30363d;color:#e6edf3;border:1px solid #30363d;border-radius:10px;padding:8px 14px;cursor:pointer">🤖 A idioma IA</button>
+</div>
+<pre id="tr_out" style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;font-size:13px;white-space:pre-wrap;min-height:60px"></pre>
+</div>
+</div>
+</main>
+<script src="/static/modo_humano.js?v=2"></script>
+<script src="/static/app.js?v=22"></script>
+</body>
+</html>
