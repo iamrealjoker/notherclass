@@ -1,7 +1,11 @@
 # docker-compose.prod.yml — ENTORNO DE PRODUCCIÓN
 #   docker compose -p nc-prod -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# · Código ESTABLE, copia separada del de dev (./prod/notherclass).
+# · Código ESTABLE: usa una CARPETA PROPIA (./prod/notherclass) para no pisar la
+#   de desarrollo. Cópiala ahí (o clona el repo otra vez):
+#       mkdir -p prod && cp -r agent consola translator configAgentes.json \
+#         docker-compose*.yml Dockerfile prod/notherclass
+#   Si prefieres reutilizar el mismo código, pon tu ruta en TW_CODE.
 # · Solo escucha en 127.0.0.1: tu proxy inverso (nginx/Caddy con HTTPS + auth) es
 #   la ÚNICA entrada pública. Nunca expongas la consola directamente.
 # · ⚠️ Usa un TOKEN DE TELEGRAM DISTINTO al de dev (dos pollers = conflicto).
@@ -14,5 +18,9 @@ services:
     ports:
       - "127.0.0.1:${TW_PORT_PROD:-5001}:5000"   # muy recomendado: solo localhost
     volumes:
-      - ./prod/notherclass:/app/notherclass
+      - ${TW_CODE_PROD:-./prod/notherclass}:/app/notherclass
+      # Datos de prod SEPARADOS de los de dev
+      - ${TW_DATA_PROD:-./data-prod}/MEMORY:/app/notherclass/agent/MEMORY
+      - ${TW_DATA_PROD:-./data-prod}/audio_models:/app/notherclass/agent/audio_models
+      - ${TW_DATA_PROD:-./data-prod}/consola:/app/notherclass/consola/datos
 

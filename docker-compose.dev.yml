@@ -1,8 +1,8 @@
 # docker-compose.dev.yml — ENTORNO DE DESARROLLO (edición en vivo)
 #   docker compose -p nc-dev -f docker-compose.yml -f docker-compose.dev.yml up -d
 #
-# · El código del HOST se monta en el contenedor -> editas y pruebas al instante.
-# · La web de dev se enlaza SOLO a 127.0.0.1 (Docker se salta ufw): si la quieres
+# · El código del HOST se monta en el contenedor -> editas y reinicias sin rebuild.
+# · La web se enlaza SOLO a 127.0.0.1 (Docker se salta ufw): si la quieres
 #   pública, pon delante un proxy con autenticación. Para verla desde tu PC:
 #       ssh -L 5000:localhost:5000 usuario@tu-servidor   ->  http://localhost:5000
 services:
@@ -13,6 +13,4 @@ services:
       - TW_PERFIL=dev
     ports:
       - "127.0.0.1:${TW_PORT_HOST:-5000}:5000"   # consola (solo localhost)
-    volumes:
-      - ${TW_CODE:-./dev/notherclass}:/app/notherclass
 

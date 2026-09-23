@@ -42,7 +42,7 @@ TW_AGENT_STORE=Forja
 
 TW_LLM_PROVIDER=deepseek
 TW_LLM_API_KEY=aqui_tu_clave
-TW_LLM_MODEL=deepseek-flash
+TW_LLM_MODEL=deepseek-chat
 
 TW_TELEGRAM_BOT_TOKEN=aqui_tu_token_de_botfather
 TW_TELEGRAM_ALLOWED_USER_IDS=aqui_tu_id_numerico
@@ -53,8 +53,14 @@ En **`.env`** (el de la raíz) solo ajustas infraestructura:
 ```ini
 TW_PORT_HOST=5000     # puerto donde publicar la consola
 TZ=Europe/Madrid
+# opcional: dónde guardar los datos persistentes (memoria, voces, consola)
+# TW_DATA=./data
 ```
 
+> ⚠️ **Rellena `TW_TELEGRAM_ALLOWED_USER_IDS`** con tu id numérico (lo da
+> [@userinfobot](https://t.me/userinfobot)). Si lo dejas vacío, **cualquiera que
+> encuentre tu bot podrá hablar con tu agente** y gastar tus tokens.
+>
 > 🔒 Los dos `.env` están en `.gitignore`: **nunca** se suben al repositorio.
 
 ---
@@ -138,13 +144,16 @@ docker compose -p nc -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 | Qué | Dónde (en tu host) |
 |---|---|
-| Memoria del agente | `agent/MEMORY/brain_<store>.sqlite3` |
+| Memoria del agente | `data/MEMORY/brain_<store>.sqlite3` |
+| Voces (TTS) | `data/audio_models/` |
+| Consola (historial, voz) | `data/consola/` |
 | Config y secretos | `agent/.env` |
-| Consola (historial, voz) | `consola/datos/` |
 | Pizarra del grupo | `grupo_bus/` |
 
-Son **bind mounts**: sobreviven a `down`, a reconstruir la imagen y a
-actualizarla. Copia esa carpeta y tienes un **backup completo** de tu agente.
+Los tres primeros van a `./data/` (o donde pongas `TW_DATA` en tu `.env`), **fuera
+del código**: sobreviven a `down`, a reconstruir la imagen y a actualizarla.
+
+**Haz backup copiando `data/`** y tienes la memoria de tu agente a salvo.
 
 ---
 

@@ -49,5 +49,9 @@ RUN python3.11 -m venv venv311 \
  && venv311/bin/pip install --no-cache-dir faster-whisper
 
 # El agente principal es el proceso que arranca; él levanta el resto (supervisor).
-CMD ["python3", "run.py"]
+# Se deja un ENTRYPOINT (bash) para que docker-compose pueda mandarle argumentos
+# con `command: ["-c", "..."]` sin que "‑c" se interprete como el PROGRAMA.
+# El CMD por defecto es arrancar el agente directamente.
+ENTRYPOINT ["/bin/bash"]
+CMD ["-c", "exec python3 /app/notherclass/agent/run.py"]
 

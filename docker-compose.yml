@@ -1,17 +1,23 @@
-# docker-compose.yml — BASE común (la usan dev y prod)
+# docker-compose.yml — NotherClass (agente + consola web)
+#
+#   docker compose -p nc -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 #
 # ⚠️ NO se parte en varios contenedores a propósito: el agente principal es el PID 1
 #    y el supervisor (watcher/guardián) arranca y vigila al resto leyendo /proc
 #    DENTRO del contenedor. Si los separas, se cae el auto-arranque.
 #
-# SIEMPRE se usa junto a un overlay y con un NOMBRE DE PROYECTO distinto:
+# Este fichero es la BASE: se usa con un overlay (dev o prod) y un NOMBRE DE
+# PROYECTO distinto para poder tener los dos a la vez sin que choquen:
 #   DEV  : docker compose -p nc-dev  -f docker-compose.yml -f docker-compose.dev.yml  up -d
 #   PROD : docker compose -p nc-prod -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# Cada proyecto levanta SU propio agente + watcher + extras (los puertos internos
-# no chocan: cada contenedor tiene su propia red).
+# Rutas configurables sin tocar el fichero (ponlas en tu .env de compose):
+#   TW_CODE      carpeta del código (por defecto: la del propio repo, ".")
+#   TW_ENV_FILE  ruta de tu .env    (por defecto: ./agent/.env)
+#   TW_DATA      carpeta de datos   (memoria, voces, consola)
 services:
   notherclass:
+    build: .
     image: ${TW_IMAGE:-notherclass:latest}
     container_name: ${TW_NAME:-notherclass}
     restart: unless-stopped
@@ -23,11 +29,18 @@ services:
         exec python3 /app/notherclass/agent/run.py
     working_dir: /app/notherclass/agent
     env_file:
-      - ${TW_ENV_FILE:-./dev/notherclass/agent/.env}
+      - ${TW_ENV_FILE:-./agent/.env}
     environment:
       - TZ=${TZ:-Europe/Madrid}
     volumes:
-      - ${TW_CODE:-./dev/notherclass}:/app/notherclass
+      # Código: por defecto el propio repo (editas y reinicias, sin rebuild).
+      - ${TW_CODE:-.}:/app/notherclass
+      # Datos que DEBEN sobrevivir a recrear el contenedor. Van FUERA del código
+      # porque el .dockerignore excluye MEMORY/ y logs/: si se perdieran, el
+      # agente olvidaría todo lo aprendido y volvería a descargar las voces.
+      - ${TW_DATA:-./data}/MEMORY:/app/notherclass/agent/MEMORY
+      - ${TW_DATA:-./data}/audio_models:/app/notherclass/agent/audio_models
+      - ${TW_DATA:-./data}/consola:/app/notherclass/consola/datos
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:5000/health || exit 1"]
       interval: 30s
