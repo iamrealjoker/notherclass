@@ -1389,10 +1389,27 @@ def run_oneshot(query: str):
 def run_daemon():
     token = cfg("TW_TELEGRAM_BOT_TOKEN")
     if not token:
-        print("No hay TW_TELEGRAM_BOT_TOKEN. Usa --oneshot o configura el .env.")
-        sys.exit(1)
+        # Sin token de Telegram el agente NO tiene por qué morir: la Superconsola
+        # web es una vía de uso completa por sí sola. Antes salía con error y, con
+        # `restart: unless-stopped` en Docker, entraba en un BUCLE infinito de
+        # reinicios (quemaba CPU y llenaba los logs) si el usuario no había puesto
+        # token todavía. Ahora se queda vivo sirviendo la consola y explicándolo.
+        print("=" * 70, flush=True)
+        print("⚠️  No hay TW_TELEGRAM_BOT_TOKEN en agent/.env", flush=True)
+        print("    El agente funcionará SOLO por la Superconsola web (sin Telegram).", flush=True)
+        print("    Para hablarle por Telegram:", flush=True)
+        print("      1. Crea un bot con @BotFather (/newbot)", flush=True)
+        print("      2. Copia el token en agent/.env -> TW_TELEGRAM_BOT_TOKEN=...", flush=True)
+        print("      3. Reinicia el agente (docker compose ... restart)", flush=True)
+        print("    Para una prueba rápida sin Telegram:", flush=True)
+        print('      python3 run.py --oneshot "hola, preséntate"', flush=True)
+        print("=" * 70, flush=True)
     agent = Agent()
-    print(f"🧠 {agent.name} escuchando Telegram… (Ctrl+C para salir)")
+    if token:
+        print(f"🧠 {agent.name} escuchando Telegram… (Ctrl+C para salir)")
+    else:
+        print(f"🧠 {agent.name} activo SIN Telegram (solo consola web / --oneshot)."
+              " Ctrl+C para salir.")
 
     # API LOCAL de turnos para la WEB: el MISMO agente (mismas herramientas y
     # memoria, mismo proceso). Solo se levanta si el agente tiene 'http_port'.
@@ -1640,6 +1657,13 @@ def run_daemon():
 
         threading.Thread(target=supervisor_reaseguro_loop, daemon=True).start()
         agent.log.write("supervisor", {"evento": "reaseguro_hilo_iniciado"})
+
+    if not token:
+        # Sin token: NO se crea el bot de Telegram. El proceso se queda VIVO para
+        # servir la API local de turnos (la Superconsola web funciona igual) y no
+        # entra en bucle de reinicios bajo `restart: unless-stopped`.
+        while True:
+            time.sleep(3600)
 
     tbot = TelegramBot(token, on_message=on_message, on_voice=on_voice,
                        allowed_ids=cfg("TW_TELEGRAM_ALLOWED_USER_IDS"))

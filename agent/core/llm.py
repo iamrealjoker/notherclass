@@ -55,14 +55,23 @@ def _load_dotenv(path: str = ".env"):
         from dotenv import load_dotenv  # type: ignore
         load_dotenv(path, override=False)
     except Exception:
-        # parse manual mínimo, ignora comillas y comentarios
+        # parse manual mínimo, ignora comillas y comentarios.
+        # OJO: se usa asignación directa (NO setdefault) a propósito. Docker
+        # Compose con `env_file:` declara las variables con valor VACÍO en el
+        # entorno, así que con setdefault el valor del .env nunca se aplicaba:
+        # el agente decía "No hay TW_TELEGRAM_BOT_TOKEN" aunque estuviera puesto
+        # (bug detectado probando el arranque en Docker).
         with open(path, "r", encoding="utf-8") as f:
             for raw in f:
                 line = raw.strip()
                 if not line or line.startswith("#") or "=" not in line:
                     continue
                 k, v = line.split("=", 1)
-                _ENV.setdefault(k.strip(), v.strip().strip("\"'"))
+                k = k.strip()
+                v = v.strip().strip("\"'")
+                # no pisar una variable REAL del entorno con un valor vacío
+                if v or not _ENV.get(k):
+                    _ENV[k] = v
 
 
 def resolve_provider_cfg(provider: Optional[str] = None) -> dict:
