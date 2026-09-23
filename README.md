@@ -389,6 +389,10 @@ Después conectas Telegram y tienes el asistente completo.
 > 📖 **¿Primera vez?** Sigue [`COMO_PROBARLO.md`](COMO_PROBARLO.md): qué necesitas
 > antes, cómo saber si funcionó y **qué hacer si algo falla** (con los errores reales
 > que nos encontramos y su causa).
+>
+> ✅ **Las dos vías están probadas de punta a punta** clonando el repo en limpio
+> (clonar → copiar plantilla → instalar → responder). Si algo no arranca, casi
+> siempre es el `.env`: mira el historial de correcciones.
 
 ### ¿Y luego qué?
 
