@@ -8,7 +8,8 @@ TTS sin dependencia de la persona de joker.
 import os
 import subprocess
 
-AGENT = "/app/notherclass/agent"
+AGENT = os.environ.get("TW_AGENT_DIR") or os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agent"))
 PIPER_BIN = "/opt/piper/piper"
 ES_MODEL = os.path.join(AGENT, "audio_models", "es_ES-davefx-medium.onnx")
 EN_MODEL = os.path.join(AGENT, "audio_models", "en_US-lessac-medium.onnx")

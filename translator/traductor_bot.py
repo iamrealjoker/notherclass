@@ -11,7 +11,9 @@ lo que escucho y su traduccion, y luego el audio en el idioma contrario.
 import json, os, re, sys, time, threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-AGENT = "/app/notherclass/agent"
+# Ruta del agente CALCULADA (../agent respecto a translator/): así funciona
+# clonando el repo donde quieras, no solo en la ruta de Docker.
+AGENT = os.environ.get("TW_AGENT_DIR") or os.path.abspath(os.path.join(HERE, "..", "agent"))
 for p in (AGENT, HERE):
     if p not in sys.path:
         sys.path.insert(0, p)

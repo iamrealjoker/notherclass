@@ -24,7 +24,12 @@ import time
 from flask import Blueprint, jsonify, request, send_file
 
 # El motor de voz vive en agent/. Lo añadimos al path para importarlo tal cual.
-AGENT_DIR = os.environ.get("TW_AGENT_DIR", "/app/notherclass/agent")
+# La ruta se CALCULA sola (hermano de consola/): así funciona igual clonando el
+# repo en cualquier carpeta (antes caía a /app/notherclass/agent, ruta de Docker,
+# y en instalación "source" fallaba con ModuleNotFoundError: No module named 'core').
+# TW_AGENT_DIR permite forzarla si tienes el agente en otro sitio.
+AGENT_DIR = os.environ.get("TW_AGENT_DIR") or os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "agent"))
 if AGENT_DIR not in sys.path:
     sys.path.insert(0, AGENT_DIR)
 

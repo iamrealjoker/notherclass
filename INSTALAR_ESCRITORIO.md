@@ -87,21 +87,25 @@ agent/venv311/bin/pip install faster-whisper
 Con eso el agente usa el **servicio residente** (el modelo se carga una vez y
 responde en ~1-2 s por nota).
 
-**b) Voz de salida (TTS)** — `piper`:
+**b) Voz de salida (TTS)** — `piper` (binario, 1 comando):
 
 ```bash
-# Descarga piper (binario) y una voz en español
 mkdir -p ~/piper && cd ~/piper
-# Descarga desde https://github.com/rhasspy/piper/releases
-# y los modelos .onnx desde https://huggingface.co/rhasspy/piper-voices
+wget -q https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz -O piper.tgz
+tar -xzf piper.tgz --strip-components=1 && rm piper.tgz
 ```
+
+> 🎉 **Las voces .onnx ya NO hay que bajarlas a mano**: el agente las descarga
+> solas (~60 MB) la primera vez que tiene que hablar y las guarda en
+> `agent/audio_models/`. Si prefieres traerlas tú, mira
+> <https://huggingface.co/rhasspy/piper-voices>.
 
 Luego, en `agent/.env`:
 
 ```ini
 TW_PIPER_BIN=/home/tu-usuario/piper/piper
-TW_PIPER_MODEL=/ruta/a/es_ES-voz-medium.onnx
-TW_WHISPER_MODEL=/ruta/a/ggml-base.bin   # si usas whisper.cpp en lugar de faster-whisper
+# TW_PIPER_MODEL=/ruta/a/es_ES-voz-medium.onnx   # solo si usas otra voz
+# TW_WHISPER_MODEL=/ruta/a/ggml-base.bin         # solo si usas whisper.cpp
 ```
 
 ---

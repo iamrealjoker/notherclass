@@ -6,7 +6,10 @@ Fallback a whisper.cpp si faster-whisper no está disponible.
 import os
 import subprocess
 
-AGENT = "/app/notherclass/agent"
+# Ruta del agente CALCULADA (../agent respecto a translator/): funciona clonando
+# el repo en cualquier carpeta. Antes estaba fija a la ruta de Docker.
+AGENT = os.environ.get("TW_AGENT_DIR") or os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agent"))
 FW_PY = os.path.join(AGENT, "venv311", "bin", "python")
 FW_SCRIPT = os.path.join(AGENT, "fw_stt.py")
 WHISPER_CLI = "/opt/whisper.cpp/build/bin/whisper-cli"

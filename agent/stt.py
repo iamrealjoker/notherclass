@@ -3,7 +3,11 @@ import os
 import subprocess
 import tempfile
 
-AGENT = "/app/notherclass/agent"
+# Ruta del agente CALCULADA (hermano de este fichero -> funciona clonando en
+# cualquier carpeta). Antes era "/app/notherclass/agent" fijo: ruta solo de
+# Docker, y en instalación "source" fallaba al no encontrar venv311/fw_stt.py.
+# TW_AGENT_DIR permite forzarla.
+AGENT = os.environ.get("TW_AGENT_DIR") or os.path.dirname(os.path.abspath(__file__))
 FW_PY = os.path.join(AGENT, "venv311", "bin", "python")
 FW_SCRIPT = os.path.join(AGENT, "fw_stt.py")
 WHISPER_CLI = "/opt/whisper.cpp/build/bin/whisper-cli"
